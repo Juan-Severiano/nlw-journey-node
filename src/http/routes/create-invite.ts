@@ -1,7 +1,5 @@
 import { dayjs } from "@/lib/dayjs"
 import { prisma } from "@/lib/prisma"
-import { getMailClient } from "@/mail"
-import nodemailer from "nodemailer"
 import type { FastifyInstance } from "fastify"
 import type { ZodTypeProvider } from "fastify-type-provider-zod"
 import z from "zod"
@@ -45,8 +43,6 @@ export const createInvite = async (app: FastifyInstance) => {
         },
       })
 
-      const mail = await getMailClient()
-
       const formattedTripStartDate = dayjs(trip.starts_at).format("D[ de ]MMMM")
       const formattedTripEndDate = dayjs(trip.ends_at).format("D[ de ]MMMM")
 
@@ -55,28 +51,26 @@ export const createInvite = async (app: FastifyInstance) => {
         "http://192.168.0.156:3000"
       )
 
-      const message = await mail.sendMail({
-        from: {
-          name: "Equipe plann.er",
-          address: "oi@plann.er",
-        },
-        to: participant.email,
-        subject: `Confirme sua presença na viagem para ${trip.destination} em ${formattedTripStartDate}`,
-        html: `
-        <div style="font-family: sans-serif; font-size: 16px; line-height: 1.6;">
-          <p>Você foi convidado(a) para participar de uma viagem para <strong>${trip.destination}</strong> nas datas de <strong>${formattedTripStartDate} até ${formattedTripEndDate}</strong>.</p>
-          <p></p>
-          <p>Para confirmar sua presença na viagem, clique no link abaixo:</p>
-          <p></p>
-          <p>
-            <a href="${confirmationLink.toString()}">Confirmar viagem</a>
-          </p>
-          <p>Caso você não saiba do que se trata esse e-mail, apenas ignore esse e-mail.</p>
-        </div>
-      `.trim(),
-      })
-
-      console.log(nodemailer.getTestMessageUrl(message))
+      // const message = await mail.sendMail({
+      //   from: {
+      //     name: "Equipe plann.er",
+      //     address: "oi@plann.er",
+      //   },
+      //   to: participant.email,
+      //   subject: `Confirme sua presença na viagem para ${trip.destination} em ${formattedTripStartDate}`,
+      //   html: `
+      //   <div style="font-family: sans-serif; font-size: 16px; line-height: 1.6;">
+      //     <p>Você foi convidado(a) para participar de uma viagem para <strong>${trip.destination}</strong> nas datas de <strong>${formattedTripStartDate} até ${formattedTripEndDate}</strong>.</p>
+      //     <p></p>
+      //     <p>Para confirmar sua presença na viagem, clique no link abaixo:</p>
+      //     <p></p>
+      //     <p>
+      //       <a href="${confirmationLink.toString()}">Confirmar viagem</a>
+      //     </p>
+      //     <p>Caso você não saiba do que se trata esse e-mail, apenas ignore esse e-mail.</p>
+      //   </div>
+      // `.trim(),
+      // })
 
       return reply.status(201).send()
     }

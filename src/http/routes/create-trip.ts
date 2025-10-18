@@ -1,7 +1,6 @@
 import { env } from '@/env'
 import { dayjs } from '@/lib/dayjs'
 import { prisma } from '@/lib/prisma'
-import { getMailClient } from '@/mail'
 import nodemailer from 'nodemailer'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -71,8 +70,6 @@ export const createTrip = async (app: FastifyInstance) => {
         },
       })
 
-      const mail = await getMailClient()
-
       const formattedTripStartDate = dayjs(starts_at).format('D[ de ]MMMM')
       const formattedTripEndDate = dayjs(ends_at).format('D[ de ]MMMM')
 
@@ -81,31 +78,31 @@ export const createTrip = async (app: FastifyInstance) => {
         env.API_BASE_URL,
       )
 
-      const message = await mail.sendMail({
-        from: {
-          name: 'Equipe plann.er',
-          address: 'oi@plann.er',
-        },
-        to: {
-          name: owner_name,
-          address: owner_email,
-        },
-        subject: `Confirme sua viagem para ${destination} em ${formattedTripStartDate}`,
-        html: `
-          <div style="font-family: sans-serif; font-size: 16px; line-height: 1.6;">
-            <p>Você solicitou a criação de uma viagem para <strong>${destination}</strong> nas datas de ${formattedTripStartDate} até ${formattedTripEndDate}.</p>
-            <p></p>
-            <p>Para confirmar sua viagem, clique no link abaixo:</p>
-            <p></p>
-            <p>
-              <a href="${confirmationLink.toString()}">Confirmar viagem</a>
-            </p>
-            <p>Caso você não saiba do que se trata esse e-mail, apenas ignore esse e-mail.</p>
-          </div>
-        `.trim(),
-      })
+      // const message = await mail.sendMail({
+      //   from: {
+      //     name: 'Equipe plann.er',
+      //     address: 'oi@plann.er',
+      //   },
+      //   to: {
+      //     name: owner_name,
+      //     address: owner_email,
+      //   },
+      //   subject: `Confirme sua viagem para ${destination} em ${formattedTripStartDate}`,
+      //   html: `
+      //     <div style="font-family: sans-serif; font-size: 16px; line-height: 1.6;">
+      //       <p>Você solicitou a criação de uma viagem para <strong>${destination}</strong> nas datas de ${formattedTripStartDate} até ${formattedTripEndDate}.</p>
+      //       <p></p>
+      //       <p>Para confirmar sua viagem, clique no link abaixo:</p>
+      //       <p></p>
+      //       <p>
+      //         <a href="${confirmationLink.toString()}">Confirmar viagem</a>
+      //       </p>
+      //       <p>Caso você não saiba do que se trata esse e-mail, apenas ignore esse e-mail.</p>
+      //     </div>
+      //   `.trim(),
+      // })
 
-      console.log(nodemailer.getTestMessageUrl(message))
+      // console.log(nodemailer.getTestMessageUrl(message))
 
       return reply.status(201).send({
         tripId: trip.id,
